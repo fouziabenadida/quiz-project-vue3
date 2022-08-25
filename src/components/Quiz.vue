@@ -1,64 +1,89 @@
 <template>
 <div>
+  <template v-if="this.question">
+    <h1 v-html="this.question"></h1>
+   <ul>
+    <li v-for="(answer, index) in this.answers" :key="index">
+      <input type="radio" name="options" :value="answer" v-model="this.chosen_answer" />
 
-  <h1>Microphone can be used only to pick up sound, 
-    but also to project sound similar to a speaker.</h1>
-    <input type="radio" name="options" value="true"/>
-    <label for="options">True</label>
-    <input type="radio" name="options" value="false"/>
-    <label for="options">False</label>
-    <div>
-    <button class="send" type="button">Send</button>
-   </div>
-
-</div>
-   
+      <label v-html="answer"></label>
+    </li>
+    </ul>
+     <button @click="submitAnswer" class="send" type="button">Send</button>
+  </template>
+ </div>
 </template>
+
 <script>
-
-
-
-
-
-
 export default {
-    name: 'quiz-vue',
-
-    created() {
-        this.axios
-        .get('https://opentdb.com/api.php?amount=1&category=18')
-        .then((response) => {
-            console.log(response.data.results[0])
-        })
+  name: "quiz-vue",
+  data() {
+    return {
+      question: undefined,
+      correctAnswers: undefined,
+      incorrectAnswers: undefined,
+      chosen_answer:undefined
+    };
+  },
+  methods:{
+   submitAnswer (){
+    if (!this.chosen_answer) {
+        alert('Pick one of the options')
     }
-    
+   }
+  },
 
-   
+  computed: {
+    answers() {
+      var answers = JSON.parse(JSON.stringify(this.incorrectAnswers));
+      answers.splice(
+        Math.round(Math.random() * answers.length),
+        0,
+        this.correctAnswers
+      );
+      return answers;
+    },
+  },
 
-
-}
-
-
+  created() {
+    this.axios
+      .get("https://opentdb.com/api.php?amount=1&category=18")
+      .then((response) => {
+        (this.question = response.data.results[0].question),
+          (this.correctAnswers = response.data.results[0].correct_answer),
+          (this.incorrectAnswers = response.data.results[0].incorrect_answers);
+        console.log(response.data.results[0]);
+      });
+  },
+};
 </script>
 
 
 
 
 <style scoped>
-input [type=radio]{
-    margin: 12px 4px;
+input [type="radio"] {
+  margin: 12px 4px;
 }
 
-.send{
-    margin-top: 12px;
-    height: 40px;
-    max-width: 120px;
-    padding: 0 30px;
-    color:#fff;
-    background-color: #1867c0 ;
-    cursor: pointer;
-
-    
+.send {
+  margin-top: 12px;
+  height: 40px;
+  width: 200px;
+  padding: 0 30px;
+  color: #fff;
+  background-color: #1867c0;
+  cursor: pointer;
 }
+ul{
+    list-style-type: none;
+   
+}
+li{
+   
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
 
+}
 </style>
